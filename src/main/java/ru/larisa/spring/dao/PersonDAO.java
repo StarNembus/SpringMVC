@@ -10,6 +10,8 @@ import ru.larisa.spring.models.Person;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @Component
 public class PersonDAO {
     private final JdbcTemplate jdbcTemplate;
@@ -22,6 +24,11 @@ public class PersonDAO {
     public List<Person> index(){
         return jdbcTemplate.query("SELECT * FROM public.person", new BeanPropertyRowMapper<>(Person.class));
     }
+
+    public Optional<Person> show (String email) {
+        return jdbcTemplate.query("SELECT * FROM public.person WHERE email=?", new Object[] {email},
+                new BeanPropertyRowMapper<>(Person.class)).stream().findAny();
+    }
     public Person show (int id){
         return jdbcTemplate.query("SELECT * FROM public.person WHERE id=?", new Object[]{id},
                         new BeanPropertyRowMapper<>(Person.class))
@@ -31,7 +38,7 @@ public class PersonDAO {
 
     }
     public void save(Person person){
-        jdbcTemplate.update("INSERT INTO public.person VALUES(6, ?, ?, ?)", person.getName(),
+        jdbcTemplate.update("INSERT INTO public.person(name, age, email) VALUES(?, ?, ?)", person.getName(),
                 person.getAge(), person.getEmail());
     }
     public void update(int id, Person updatePerson){
