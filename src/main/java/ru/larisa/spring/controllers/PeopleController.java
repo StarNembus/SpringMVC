@@ -57,13 +57,11 @@ public class PeopleController {
         personDAO.save(person);
         return "redirect:/people";
     }
-
     @GetMapping("/{id}/edit")
     public String edit(Model model, @PathVariable("id") int id) throws SQLException {
         model.addAttribute("person", personDAO.show(id));
         return "people/edit";
     }
-
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid Person person,
                          BindingResult bindingResult,
@@ -79,5 +77,4 @@ public class PeopleController {
         personDAO.delete(id);
         return "redirect:/people";
     }
-
 }
