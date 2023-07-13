@@ -7,7 +7,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import ru.larisa.spring.dao.PersonDAO;
 import ru.larisa.spring.models.Person;
-import ru.larisa.spring.util.PersonValidator;
 
 import javax.validation.Valid;
 import java.sql.SQLException;
@@ -17,24 +16,22 @@ import java.sql.SQLException;
 public class PeopleController {
 
     private final PersonDAO personDAO;
-    private final PersonValidator personValidator;
+//    private final PersonValidator personValidator;
 
     // зависимости
     @Autowired
-    public PeopleController(PersonDAO personDAO, PersonValidator personValidator) {
+    public PeopleController(PersonDAO personDAO) {
         this.personDAO = personDAO;
-        this.personValidator = personValidator;
     }
 
     @GetMapping()
-    public String index(Model model) throws SQLException {
-        // Получим всех людей и положим их в модель, чтобы передать их в представление
+    public String index(Model model) {
         model.addAttribute("people", personDAO.index());
         return "people/index";
     }
+
     @GetMapping("/{id}")
-    public String show(@PathVariable("id") int id, Model model) throws SQLException {
-        // Получим одного человека по id из DAO и передадим на отображение в представление
+    public String show(@PathVariable("id") int id, Model model) {
         model.addAttribute("person", personDAO.show(id));
         return "people/show";
     }
@@ -44,12 +41,12 @@ public class PeopleController {
     }
 
     @PostMapping()
-    // @ModelAttribute добавляет объект в модель
-    // @Valid проверяет на валидность
+     @ModelAttribute
+     @Valid
     public String create(@ModelAttribute("person") @Valid Person person,
                          // ошибка валидности помещается в отдельный объект bindingResult
                          BindingResult bindingResult) throws SQLException {
-        personValidator.validate(person, bindingResult);
+//        personValidator.validate(person, bindingResult);
         // если в форме есть ошибки заново переходим на страницу создания человека
         if(bindingResult.hasErrors())
             return "people/new";
@@ -66,7 +63,7 @@ public class PeopleController {
     public String update(@ModelAttribute("person") @Valid Person person,
                          BindingResult bindingResult,
                          @PathVariable("id") int id) throws SQLException {
-        personValidator.validate(person, bindingResult);
+//        personValidator.validate(person, bindingResult);
         if(bindingResult.hasErrors())
             return "people/edit";
         personDAO.update(id, person);
