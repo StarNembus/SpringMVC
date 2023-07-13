@@ -23,20 +23,32 @@ public class PersonDAO {
     @Transactional(readOnly = true)
     public List<Person> index() {
         Session session = sessionFactory.getCurrentSession();
-
         return session.createQuery("select p from Person p", Person.class)
                 .getResultList();
     }
+    @Transactional(readOnly = true)
+    public Person show (int id) {
+        Session session = sessionFactory.getCurrentSession();
+        return session.get(Person.class, id);
 
-    public Person show (int id){
-        return null;
-
     }
-    public void save(Person person){
+    @Transactional
+    public void save(Person person) {
+        Session session = sessionFactory.getCurrentSession();
+        session.save(person);
     }
-    public void update(int id, Person updatePerson){
+    @Transactional
+    public void update(int id, Person updatePerson) {
+        Session session = sessionFactory.getCurrentSession();
+        Person personToBeUpdated = session.get(Person.class, id);
+        personToBeUpdated.setName(updatePerson.getName());
+        personToBeUpdated.setAge(updatePerson.getAge());
+        personToBeUpdated.setEmail(updatePerson.getEmail());
     }
-    public void delete(int id) throws SQLException {
+    @Transactional
+    public void delete(int id) {
+        Session session = sessionFactory.getCurrentSession();
+        session.remove(session.get(Person.class, id));
     }
 
 

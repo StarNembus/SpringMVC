@@ -41,8 +41,6 @@ public class PeopleController {
     }
 
     @PostMapping()
-     @ModelAttribute
-     @Valid
     public String create(@ModelAttribute("person") @Valid Person person,
                          // ошибка валидности помещается в отдельный объект bindingResult
                          BindingResult bindingResult) throws SQLException {
@@ -55,7 +53,7 @@ public class PeopleController {
         return "redirect:/people";
     }
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id) throws SQLException {
+    public String edit(Model model, @PathVariable("id") int id){
         model.addAttribute("person", personDAO.show(id));
         return "people/edit";
     }
