@@ -5,8 +5,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-import ru.larisa.spring.dao.PersonDAO;
 import ru.larisa.spring.models.Person;
+import ru.larisa.spring.services.ItemService;
+import ru.larisa.spring.services.PeopleService;
 
 import javax.validation.Valid;
 import java.sql.SQLException;
@@ -15,24 +16,28 @@ import java.sql.SQLException;
 @RequestMapping("/people")
 public class PeopleController {
 
-    private final PersonDAO personDAO;
-//    private final PersonValidator personValidator;
+    private final PeopleService peopleService;
+    private final ItemService itemService;
 
     // зависимости
     @Autowired
-    public PeopleController(PersonDAO personDAO) {
-        this.personDAO = personDAO;
+    public PeopleController(PeopleService peopleService, ItemService itemService) {
+        this.peopleService = peopleService;
+        this.itemService = itemService;
     }
 
     @GetMapping()
     public String index(Model model) {
-        model.addAttribute("people", personDAO.index());
+        model.addAttribute("people", peopleService.findAll());
+        itemService.findByItemName("Airpods");
+        itemService.findByOwner(peopleService.findAll().get(0));
+        peopleService.test();
         return "people/index";
     }
 
     @GetMapping("/{id}")
     public String show(@PathVariable("id") int id, Model model) {
-        model.addAttribute("person", personDAO.show(id));
+        model.addAttribute("person", peopleService.findOne(id));
         return "people/show";
     }
     @GetMapping("/new")
@@ -41,8 +46,6 @@ public class PeopleController {
     }
 
     @PostMapping()
-     @ModelAttribute
-     @Valid
     public String create(@ModelAttribute("person") @Valid Person person,
                          // ошибка валидности помещается в отдельный объект bindingResult
                          BindingResult bindingResult) throws SQLException {
@@ -51,27 +54,27 @@ public class PeopleController {
         if(bindingResult.hasErrors())
             return "people/new";
         // добавляем в базу данных
-        personDAO.save(person);
+        peopleService.save(person);
         return "redirect:/people";
     }
     @GetMapping("/{id}/edit")
-    public String edit(Model model, @PathVariable("id") int id) throws SQLException {
-        model.addAttribute("person", personDAO.show(id));
+    public String edit(Model model, @PathVariable("id") int id){
+        model.addAttribute("person", peopleService.findOne(id));
         return "people/edit";
     }
     @PatchMapping("/{id}")
     public String update(@ModelAttribute("person") @Valid Person person,
                          BindingResult bindingResult,
-                         @PathVariable("id") int id) throws SQLException {
+                         @PathVariable("id") int id) {
 //        personValidator.validate(person, bindingResult);
         if(bindingResult.hasErrors())
             return "people/edit";
-        personDAO.update(id, person);
+        peopleService.update(id, person);
         return "redirect:/people";
     }
     @DeleteMapping("/{id}")
-    public String delete(@PathVariable("id") int id) throws SQLException {
-        personDAO.delete(id);
+    public String delete(@PathVariable("id") int id) {
+        peopleService.delete(id);
         return "redirect:/people";
     }
 }
